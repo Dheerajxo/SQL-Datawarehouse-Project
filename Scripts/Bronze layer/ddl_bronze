@@ -1,0 +1,108 @@
+/*
+    Project : Data Warehouse
+    Step    : 02 - Bronze layer table DDL
+    Platform: Microsoft SQL Server
+
+    Purpose:
+      Create the six source landing tables in the bronze schema.
+
+    Prerequisite:
+      Run 01-database-and-schemas/01_create_database_and_schemas.sql first,
+      or ensure DataWarehouse and the bronze schema already exist.
+
+    Rerun behavior:
+      The five tables other than crm_prd_info are created only when missing.
+      crm_prd_info follows the supplied DROP TABLE IF EXISTS pattern, so its
+      existing table and any data in it are removed and the table is recreated.
+*/
+
+USE [DataWarehouse];
+GO
+
+/* Customer source data. */
+IF OBJECT_ID(N'bronze.crm_cust_info', N'U') IS NULL
+BEGIN
+    CREATE TABLE bronze.crm_cust_info
+    (
+        cst_id             INT,
+        cst_key            NVARCHAR(50),
+        cst_firstname      NVARCHAR(50),
+        cst_lastname       NVARCHAR(50),
+        cst_marital_status NVARCHAR(50),
+        cst_gndr           NVARCHAR(50),
+        cst_create_date    DATE
+    );
+END;
+GO
+
+/* Product source data.
+   This intentionally drops and recreates the table, matching the supplied DDL.
+   Running this block again deletes any rows currently stored in this table. */
+DROP TABLE IF EXISTS bronze.crm_prd_info;
+GO
+
+CREATE TABLE bronze.crm_prd_info
+(
+    prd_id       INT,
+    prd_key      NVARCHAR(50),
+    prd_nm       NVARCHAR(50),
+    prd_cost     INT,          -- Cost is stored as an integer.
+    prd_line     NVARCHAR(50),
+    prd_start_dt DATETIME,     -- Start date and time.
+    prd_end_dt   DATETIME      -- End date and time.
+);
+GO
+
+/* Sales transaction source data. */
+IF OBJECT_ID(N'bronze.crm_sales_details', N'U') IS NULL
+BEGIN
+    CREATE TABLE bronze.crm_sales_details
+    (
+        sls_ord_num  NVARCHAR(50),
+        sls_prd_key  NVARCHAR(50),
+        sls_cust_id  INT,
+        sls_order_dt INT,
+        sls_ship_dt  INT,
+        sls_due_dt   INT,
+        sls_sales    INT,
+        sls_quantity INT,
+        sls_price    INT
+    );
+END;
+GO
+
+/* ERP customer source data. */
+IF OBJECT_ID(N'bronze.erp_cust_az12', N'U') IS NULL
+BEGIN
+    CREATE TABLE bronze.erp_cust_az12
+    (
+        cid   NVARCHAR(50),
+        bdate DATE,
+        gen   NVARCHAR(50)
+    );
+END;
+GO
+
+/* ERP product category source data. */
+IF OBJECT_ID(N'bronze.erp_px_cat_g1v2', N'U') IS NULL
+BEGIN
+    CREATE TABLE bronze.erp_px_cat_g1v2
+    (
+        id          NVARCHAR(50),
+        cat         NVARCHAR(50),
+        subcat      NVARCHAR(50),
+        maintenance NVARCHAR(50)
+    );
+END;
+GO
+
+/* ERP location source data. */
+IF OBJECT_ID(N'bronze.erp_loc_a101', N'U') IS NULL
+BEGIN
+    CREATE TABLE bronze.erp_loc_a101
+    (
+        cid   NVARCHAR(50),
+        cntry NVARCHAR(50)
+    );
+END;
+GO
